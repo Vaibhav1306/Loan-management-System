@@ -6,11 +6,9 @@ var mongoose = require("mongoose");
 const customerModel = require("../models/customers.model");
 
 /* GET All Customers */
-router.get("/", async (req, res, next) => {
+router.get("/list", async (req, res, next) => {
   try {
     let customerList = await customerModel.find();
-    const recordCount = customerList.length;
-    console.log(recordCount);
     res.send({
       status: 200,
       message: "List Data is here",
@@ -21,6 +19,24 @@ router.get("/", async (req, res, next) => {
       status: 501,
       message: "List not found",
       data: null,
+    });
+    console.log(error);
+  }
+});
+
+/* GET Details for selected+ Customers */
+router.get("/view", async (req, res, next) => {
+  try {
+    const userId = req.query.userId;
+    let customerList = await customerModel.findById(userId);
+    res.send({
+      status: 200,
+      data: customerList,
+    });
+  } catch (error) {
+    res.send({
+      status: 501,
+      message: "Customer not found",
     });
     console.log(error);
   }
@@ -48,13 +64,66 @@ router.post("/add", async (req, res, next) => {
 });
 
 //  update existing customer
-router.put("/add", function (req, res, next) {
-  res.render("index", { title: "Express" });
+router.put("/edit", async (req, res, next) => {
+  let customerObj = new customerModel(req.body);
+  try {
+    const userId = req.query.userId;
+    let customerList = await customerModel.findByIdAndUpdate(
+      userId,
+      customerObj
+    );
+    res.send({
+      status: 200,
+      data: customerList,
+    });
+  } catch (error) {
+    res.send({
+      status: 501,
+      message: "Una ble to update the customer",
+      data: null,
+    });
+    console.log(error);
+  }
 });
 
 //  delete existing customer
-router.delete("/add", function (req, res, next) {
-  res.render("index", { title: "Express" });
+router.delete("/delete", async (req, res, next) => {
+  let customerObj = new customerModel(req.body);
+  try {
+    const userId = req.query.userId;
+    await customerModel.findByIdAndDelete(userId);
+    res.send({
+      status: 200,
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    res.send({
+      status: 501,
+      message: "Unable to delete the customer",
+      data: null,
+    });
+    console.log(error);
+  }
+});
+
+// delete multiple customers
+router.delete("/delete-list", async (req, res, next) => {
+  let customerObj = new customerModel(req.body);
+  try {
+    const userId = req.query.userId;
+    await customerModel.deleteMany({ firstName: "Khushboo" });
+    res.send({
+      status: 200,
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    res.send({
+      status: 501,
+      message: "Unable to delete the customer",
+      data: null,
+    });
+    console.log(error);
+  }
 });
 
 //  search existing customer
